@@ -1,0 +1,27 @@
+country: us
+
+feeds:
+  - type: top-free
+    genres: [all, 6014, 6007, 6017, 6008, 6013, 6015, 6011, 6005]
+  - type: top-paid
+    genres: [all, 6014, 6007, 6017, 6008, 6013, 6015, 6011, 6005]
+
+genre_labels:
+  all: Overall
+  "6014": Games
+  "6007": Productivity
+  "6017": Education
+  "6008": Photo & Video
+  "6013": Health & Fitness
+  "6015": Finance
+  "6011": Music
+  "6005": Social Networking
+
+site:
+  title: "Daily First-Ever Entrants — iOS Top 100"
+  base_url: "https://gmertk.github.io/ios-top-100/"
+
+telegram:
+  enabled: true
+  chat_id: "YOUR_CHAT_ID" # user or channel id/handle
+# Bot token provided via env TELEGRAM_BOT_TOKEN
