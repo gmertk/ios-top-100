@@ -7,5 +7,7 @@ __pycache__/
 .coverage
 .pytest_cache
 .pyc
+.venv
+venv/
 
 
