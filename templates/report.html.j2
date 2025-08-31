@@ -51,7 +51,7 @@ details .content { padding: 16px; }
     <details{% if section.count > 0 %} open{% endif %}>
       <summary>
         <div class="section-header">
-          <span>{{ section.feed_label }} — {{ section.genre_label }}</span>
+          <span>{{ section.genre_label }} - {{ section.feed_label }}</span>
         </div>
         <span class="count-badge">{{ section.count }} new</span>
       </summary>

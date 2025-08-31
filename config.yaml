@@ -2,20 +2,142 @@ country: us
 
 feeds:
   - type: top-free
-    genres: [all, 6014, 6007, 6017, 6008, 6013, 6015, 6011, 6005]
+    genres: [
+        all,
+        6018,
+        6000,
+        6026,
+        6017,
+        6016,
+        6015,
+        6023,
+        6027,
+        6013,
+        # 36,
+        6012,
+        6021,
+        6020,
+        6011,
+        6010,
+        6009,
+        6008,
+        6007,
+        6006,
+        6024,
+        6005,
+        6004,
+        6003,
+        6002,
+        6001,
+        6014,
+        7001,
+        7002,
+        7004,
+        7005,
+        7006,
+        7003,
+        7009,
+        7011,
+        7012,
+        7013,
+        7014,
+        7015,
+        7016,
+        7017,
+        7018,
+        7019,
+      ]
   - type: top-paid
-    genres: [all, 6014, 6007, 6017, 6008, 6013, 6015, 6011, 6005]
+    genres: [
+        all,
+        6018,
+        6000,
+        6026,
+        6017,
+        6016,
+        6015,
+        6023,
+        6027,
+        6013,
+        # 36,
+        6012,
+        6021,
+        6020,
+        6011,
+        6010,
+        6009,
+        6008,
+        6007,
+        6006,
+        6024,
+        6005,
+        6004,
+        6003,
+        6002,
+        6001,
+        6014,
+        7001,
+        7002,
+        7004,
+        7005,
+        7006,
+        7003,
+        7009,
+        7011,
+        7012,
+        7013,
+        7014,
+        7015,
+        7016,
+        7017,
+        7018,
+        7019,
+      ]
 
 genre_labels:
   all: Overall
-  "6014": Games
-  "6007": Productivity
+  "6018": Books
+  "6000": Business
+  "6026": Developer Tools
   "6017": Education
-  "6008": Photo & Video
-  "6013": Health & Fitness
+  "6016": Entertainment
   "6015": Finance
+  "6023": Food & Drink
+  "6027": Graphics & Design
+  "6013": Health & Fitness
+  # "36": Kids
+  "6012": Lifestyle
+  "6021": Magazines & Newspapers
+  "6020": Medical
   "6011": Music
+  "6010": Navigation
+  "6009": News
+  "6008": Photo & Video
+  "6007": Productivity
+  "6006": Reference
+  "6024": Shopping
   "6005": Social Networking
+  "6004": Sports
+  "6003": Travel
+  "6002": Utilities
+  "6001": Weather
+  "6014": Games
+  "7001": Games Action
+  "7002": Games Adventure
+  "7004": Games Board
+  "7005": Games Card
+  "7006": Games Casino
+  "7003": Games Casual
+  "7009": Games Family
+  "7011": Games Music
+  "7012": Games Puzzle
+  "7013": Games Racing
+  "7014": Games Role Playing
+  "7015": Games Simulation
+  "7016": Games Sports
+  "7017": Games Strategy
+  "7018": Games Trivia
+  "7019": Games Word
 
 site:
   title: "Daily First-Ever Entrants — iOS Top 100"
