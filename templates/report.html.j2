@@ -15,6 +15,29 @@
 small .tag { margin-left: 6px; }
 h3 small { font-weight: normal; }
 hr { border: none; border-top: 1px solid #eee; margin: 8px 0 16px; }
+details { margin: 16px 0; border: 1px solid #eee; border-radius: 12px; }
+details summary { 
+  padding: 16px; 
+  cursor: pointer; 
+  background: #f8f9fa; 
+  border-radius: 12px; 
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+details[open] summary { border-radius: 12px 12px 0 0; }
+details summary:hover { background: #e9ecef; }
+details .content { padding: 16px; }
+.section-header { display: flex; align-items: center; gap: 10px; }
+.count-badge { 
+  background: #007bff; 
+  color: white; 
+  padding: 4px 8px; 
+  border-radius: 12px; 
+  font-size: 0.8rem; 
+  font-weight: normal;
+}
 </style>
 </head>
 <body>
@@ -25,22 +48,32 @@ hr { border: none; border-top: 1px solid #eee; margin: 8px 0 16px; }
 </header>
 <main>
   {% for section in sections %}
-    <article class="card">
-      <h3>{{ section.feed_label }} <small class="tag">{{ section.genre_label }}</small></h3>
-      <p class="mono">{{ section.count }} new apps</p>
-      <div class="grid">
-        {% for app in section.apps %}
-          <div class="app">
-            <img src="{{ app.artwork }}" alt="">
-            <div>
-              <div><a href="{{ app.url }}">{{ app.name }}</a></div>
-              <small>{{ app.artist }}</small><br/>
-              <small class="mono">id: {{ app.id }}{% if app.rank is not none %} — rank {{ app.rank }}{% endif %}</small>
-            </div>
+    <details{% if section.count > 0 %} open{% endif %}>
+      <summary>
+        <div class="section-header">
+          <span>{{ section.feed_label }} — {{ section.genre_label }}</span>
+        </div>
+        <span class="count-badge">{{ section.count }} new</span>
+      </summary>
+      <div class="content">
+        {% if section.apps %}
+          <div class="grid">
+            {% for app in section.apps %}
+              <div class="app">
+                <img src="{{ app.artwork }}" alt="">
+                <div>
+                  <div><a href="{{ app.url }}">{{ app.name }}</a></div>
+                  <small>{{ app.artist }}</small><br/>
+                  <small class="mono">id: {{ app.id }}{% if app.rank is not none %} — rank {{ app.rank }}{% endif %}</small>
+                </div>
+              </div>
+            {% endfor %}
           </div>
-        {% endfor %}
+        {% else %}
+          <p class="mono">No new apps in this category</p>
+        {% endif %}
       </div>
-    </article>
+    </details>
   {% endfor %}
 </main>
 <footer><p>Generated {{ now }}</p></footer>
