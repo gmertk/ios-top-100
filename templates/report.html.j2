@@ -60,7 +60,7 @@ details .content { padding: 16px; }
           <div class="grid">
             {% for app in section.apps %}
               <div class="app">
-                <img src="{{ app.artwork }}" alt="">
+                <a href="{{ app.url }}"><img src="{{ app.artwork }}" alt=""></a>
                 <div>
                   <div><a href="{{ app.url }}">{{ app.name }}</a></div>
                   <small>{{ app.artist }}</small><br/>
