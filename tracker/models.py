@@ -29,6 +29,7 @@ class Snapshot:
 
 @dataclass
 class SectionReport:
+    feed_type: str
     feed_label: str
     genre_label: str
     count: int
