@@ -47,8 +47,13 @@ details .content { padding: 16px; }
   <p><a href="{{ base_url }}/">← Back to Index</a></p>
 </header>
 <main>
+  <div class="filter-container">
+    <label><input type="radio" name="filter" value="all" checked> All</label>
+    <label><input type="radio" name="filter" value="top-paid"> Paid</label>
+    <label><input type="radio" name="filter" value="top-free"> Free</label>
+  </div>
   {% for section in sections %}
-    <details{% if section.count > 0 %} open{% endif %}>
+    <details class="section-details" data-feed-type="{{ section.feed_type }}"{% if section.count > 0 %} open{% endif %}>
       <summary>
         <div class="section-header">
           <span>{{ section.genre_label }} - {{ section.feed_label }}</span>
@@ -76,6 +81,29 @@ details .content { padding: 16px; }
     </details>
   {% endfor %}
 </main>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filters = document.querySelectorAll('input[name="filter"]');
+    const sections = document.querySelectorAll('.section-details');
+
+    function filterSections() {
+      const selectedFilter = document.querySelector('input[name="filter"]:checked').value;
+      sections.forEach(section => {
+        if (selectedFilter === 'all' || section.dataset.feedType === selectedFilter) {
+          section.style.display = 'block';
+        } else {
+          section.style.display = 'none';
+        }
+      });
+    }
+
+    filters.forEach(filter => {
+      filter.addEventListener('change', filterSections);
+    });
+
+    filterSections();
+  });
+</script>
 <footer><p>Generated {{ now }}</p></footer>
 </body>
 </html>

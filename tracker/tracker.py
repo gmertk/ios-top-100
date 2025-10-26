@@ -79,6 +79,7 @@ class Top100Tracker:
 
             sections.append(
                 SectionReport(
+                    feed_type=sec.feed_type,
                     feed_label=FEED_LABELS.get(sec.feed_type, sec.feed_type),
                     genre_label=self.cfg.genre_labels.get(
                         sec.genre, sec.genre),
