@@ -1,4 +1,6 @@
 import json
+from dataclasses import asdict
+from datetime import date
 from pathlib import Path
 from typing import Dict, List, Iterable, Set
 from .models import Snapshot, FeedSection
@@ -21,6 +23,8 @@ class SnapshotStore:
                     "feed_type": s.feed_type,
                     "genre": s.genre,
                     "ids": [i.id for i in s.items],
+                    "ranks": s.ranks,
+                    "items": [asdict(i) for i in s.items],
                 } for k, s in snap.feeds.items()
             }
         }
@@ -31,7 +35,24 @@ class SnapshotStore:
                                                                  ensure_ascii=False, indent=2), encoding="utf-8")
 
     def list_report_dates(self) -> List[str]:
-        return sorted([p.stem for p in self.history_dir.glob("*.json") if p.name != "latest.json"])
+        dates = []
+        for path in self.history_dir.glob("*.json"):
+            try:
+                date.fromisoformat(path.stem)
+            except ValueError:
+                continue
+            dates.append(path.stem)
+        return sorted(dates)
+
+    def history_before(self, before: str, country: str) -> List[dict]:
+        history = []
+        for day in self.list_report_dates():
+            if day >= before:
+                continue
+            data = json.loads((self.history_dir / f"{day}.json").read_text(encoding="utf-8"))
+            if data.get("country") == country and data.get("date") == day:
+                history.append(data)
+        return history
 
 
 class MetaStore:

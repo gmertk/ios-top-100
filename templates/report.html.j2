@@ -1,109 +1,74 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{ site_title }} — {{ date }}</title>
-<link rel="stylesheet" href="https://unpkg.com/mvp.css">
-<style>
-.grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 14px; }
-.card { border: 1px solid #eee; border-radius: 12px; padding: 12px; background: #fff; }
-.app { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; }
-.app img { width: 64px; height: 64px; border-radius: 12px; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New",monospace; font-size: 0.85rem; color:#555; }
-.tag { padding: 2px 6px; border-radius: 10px; background: #eee; font-size: 0.75rem; }
-small .tag { margin-left: 6px; }
-h3 small { font-weight: normal; }
-hr { border: none; border-top: 1px solid #eee; margin: 8px 0 16px; }
-details { margin: 16px 0; border: 1px solid #eee; border-radius: 12px; }
-details summary { 
-  padding: 16px; 
-  cursor: pointer; 
-  background: #f8f9fa; 
-  border-radius: 12px; 
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-details[open] summary { border-radius: 12px 12px 0 0; }
-details summary:hover { background: #e9ecef; }
-details .content { padding: 16px; }
-.section-header { display: flex; align-items: center; gap: 10px; }
-.count-badge { 
-  background: #007bff; 
-  color: white; 
-  padding: 4px 8px; 
-  border-radius: 12px; 
-  font-size: 0.8rem; 
-  font-weight: normal;
-}
-</style>
+{% include 'styles.html.j2' %}
 </head>
 <body>
-<header>
-  <h1>{{ site_title }}</h1>
-  <p>{{ country|upper }} — {{ date }} — <strong>{{ total_new }}</strong> first-ever entrants.</p>
-  <p><a href="{{ base_url }}/">← Back to Index</a></p>
-</header>
-<main>
-  <div class="filter-container">
-    <label><input type="radio" name="filter" value="all" checked> All</label>
-    <label><input type="radio" name="filter" value="top-paid"> Paid</label>
-    <label><input type="radio" name="filter" value="top-free"> Free</label>
-  </div>
-  {% for section in sections %}
-    <details class="section-details" data-feed-type="{{ section.feed_type }}"{% if section.count > 0 %} open{% endif %}>
-      <summary>
-        <div class="section-header">
-          <span>{{ section.genre_label }} - {{ section.feed_label }}</span>
-        </div>
-        <span class="count-badge">{{ section.count }} new</span>
-      </summary>
-      <div class="content">
-        {% if section.apps %}
-          <div class="grid">
-            {% for app in section.apps %}
-              <div class="app">
-                <a href="{{ app.url }}"><img src="{{ app.artwork }}" alt=""></a>
-                <div>
-                  <div><a href="{{ app.url }}">{{ app.name }}</a></div>
-                  <small>{{ app.artist }}</small><br/>
-                  <small class="mono">id: {{ app.id }}{% if app.rank is not none %} — rank {{ app.rank }}{% endif %}</small>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="mono">No new apps in this category</p>
-        {% endif %}
-      </div>
-    </details>
-  {% endfor %}
-</main>
+<a class="skip" href="#main">Skip to report</a>
+<div class="wrap">
+<nav><a class="brand" href="./index.html">{{ site_title }}</a><span class="muted">{{ country|upper }} App Store · {{ date }}</span></nav>
+<header class="hero"><p class="eyebrow">Daily discovery brief</p><h1>Find the next idea<br>in what’s gaining ground.</h1><p class="intro muted">Follow climbing apps, explore fresh releases, and find a user problem worth investigating.</p></header>
+<main id="main">
+<div class="stats"><div class="stat"><strong>{{ insights.total_apps }}</strong><span>unique apps tracked</span></div><div class="stat"><strong>{{ total_new }}</strong><span>newly observed apps</span></div><div class="stat"><strong>{{ insights.total_charts }}</strong><span>charts captured</span></div></div>
+{% if insights.gap_days and insights.gap_days > 1 %}
+<aside class="notice"><strong>Tracking resumed after {{ insights.gap_days }} days.</strong><p>The previous snapshot is from {{ insights.previous_date }}. “Newly observed” means new to our saved history; these apps may have entered during the gap. Momentum requires a snapshot on the exact comparison date.</p></aside>
+{% elif insights.baseline %}
+<aside class="notice"><strong>Your first baseline is ready.</strong><p>Future daily snapshots will reveal movement. Today’s apps establish the starting point and aren’t counted as new entrants.</p></aside>
+{% endif %}
+<section class="section" aria-labelledby="momentum-heading">
+<div class="section-top"><div><p class="eyebrow">Momentum</p><h2 id="momentum-heading">Five climbers to investigate</h2><p class="muted">One card per app. Ordered by its largest rank gain in a single chart, then consecutive daily gains and current rank.</p></div><div class="control"><label for="window">Compare</label><select id="window">{% for w in insights.windows %}<option value="{{ w.days }}"{% if w.days == insights.default_window %} selected{% endif %}>{{ w.days }} day{% if w.days != 1 %}s{% endif %}</option>{% endfor %}</select></div></div>
+<noscript><p>Enable JavaScript to switch comparison windows. The default comparison is shown below.</p></noscript>
+<div aria-live="polite">
+{% for w in insights.windows %}
+<div data-window="{{ w.days }}"{% if w.days != insights.default_window %} hidden{% endif %}>
+{% if not w.available %}
+<div class="empty"><p class="eyebrow">Collecting history</p><h3>No {{ w.days }}-day comparison yet</h3><p>We don’t have a matching chart snapshot for {{ w.baseline_date }}. Keep capturing daily reports to unlock this window.</p><p class="muted">There is no measured momentum to rank today in this window. Explore the recent releases below while the baseline builds.</p></div>
+{% else %}
+<p class="muted">{{ w.baseline_date }} → {{ date }} · {{ w.compared_charts }}/{{ insights.total_charts }} comparable charts · {{ w.matched_apps }} apps ranked on both dates · {{ w.total_movers }} unique climbers</p>
+{% if not w.shortlist %}<div class="empty"><h3>No measured climbers in this window</h3><p>Apps present on both dates did not improve their rank in a comparable chart. A new chart appearance has no known starting rank.</p></div>{% endif %}
+<div class="cards">
+{% for app in w.shortlist %}
+<article class="card"><div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><h3><a href="{{ app.url }}">{{ app.name or app.id }}</a></h3><small>{{ app.artist }}</small></div></div>
+<div class="gain">↑ {{ app.signal.gain }} places</div><p>{{ app.signal.label }}<br><strong>#{{ app.signal.previous }} → #{{ app.signal.rank }}</strong> in {{ w.days }} day{% if w.days != 1 %}s{% endif %}</p>
+<svg class="spark" viewBox="0 0 200 65" role="img" aria-label="Observed rank history for {{ app.name }}. Lower ranks are better. Gaps represent missing observations.">
+<line class="gridline" x1="5" y1="5" x2="195" y2="5"/><line class="gridline" x1="5" y1="60" x2="195" y2="60"/>
+{% for point in app.signal.observations %}{% if point.rank is not none %}
+{% set x = 5 + loop.index0 * 190 / w.days %}{% set y = 5 + (point.rank - 1) * 55 / 99 %}
+{% if not loop.first %}{% set previous = app.signal.observations[loop.index0 - 1] %}{% if previous.rank is not none %}<line x1="{{ 5 + (loop.index0 - 1) * 190 / w.days }}" y1="{{ 5 + (previous.rank - 1) * 55 / 99 }}" x2="{{ x }}" y2="{{ y }}"/>{% endif %}{% endif %}<circle cx="{{ x }}" cy="{{ y }}" r="3"><title>{{ point.date }}: #{{ point.rank }}</title></circle>
+{% endif %}{% endfor %}</svg>
+<small>{{ app.signal.observed_days }}/{{ w.days + 1 }} daily observations · #1 at top</small>
+<div class="metric">{% if app.signal.streak > 0 %}<span class="badge">{{ app.signal.streak }} consecutive daily gain{% if app.signal.streak != 1 %}s{% endif %}</span>{% endif %}<span class="badge">Rising in {{ app.rising_charts }} chart{% if app.rising_charts != 1 %}s{% endif %}</span><p>{% if app.age_days is not none %}Released {{ app.age_days }} days ago{% else %}Release date unavailable{% endif %} · First observed {{ app.first_seen }}</p></div>
+<details><summary>Inspect the rank evidence</summary><ul>{% for point in app.signal.observations %}<li>{{ point.date }}: {% if point.rank is not none %}#{{ point.rank }}{% else %}No observation{% endif %}</li>{% endfor %}</ul></details>
+<p class="research">Research next: read recent critical reviews and look for a repeated task users struggle to complete.</p>
+</article>
+{% endfor %}
+</div>
+{% if w.movers %}<div class="table-wrap"><table><caption>More climbers · one strongest chart per app</caption><thead><tr><th>App</th><th>Chart</th><th>Previous</th><th>Now</th><th>Gain</th></tr></thead><tbody>{% for app in w.movers %}<tr><td><a href="{{ app.url }}">{{ app.name or app.id }}</a></td><td>{{ app.signal.label }}</td><td class="numeric">#{{ app.signal.previous }}</td><td class="numeric">#{{ app.signal.rank }}</td><td class="numeric">↑ {{ app.signal.gain }}</td></tr>{% endfor %}</tbody></table></div>{% endif %}
+{% endif %}
+</div>
+{% endfor %}
+</div>
+<p class="research">Rank movement is a research signal, not evidence of revenue, organic growth, or an unmet need. Apps missing from the earlier chart are not assigned an invented starting rank.</p>
+</section>
+<section class="section" aria-labelledby="discovery-heading"><div class="section-top"><div><p class="eyebrow">Fresh discoveries</p><h2 id="discovery-heading">Recently released, newly observed</h2><p class="muted">{{ insights.recent_count }} unique apps released within 180 days and first observed in this snapshot. Showing up to five, ordered by best current rank, then app age. Momentum is not required.</p></div></div>
+<div class="cards">{% for app in insights.discoveries %}<article class="card"><div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><h3><a href="{{ app.url }}">{{ app.name or app.id }}</a></h3><small>{{ app.artist }}</small></div></div><span class="badge">Released {{ app.age_days }} days ago</span><p><strong>#{{ app.best_chart.rank }}</strong> in {{ app.best_chart.label }}</p><p class="muted">Appears in {{ app.charts|length }} tracked chart{% if app.charts|length != 1 %}s{% endif %}.</p><details><summary>All current chart positions</summary><ul>{% for chart in app.charts %}<li>#{{ chart.rank }} · {{ chart.label }}</li>{% endfor %}</ul></details><p class="research">Research next: identify the core user problem and check whether reviews support demand for it.</p></article>{% else %}<div class="empty"><h3>No qualifying discoveries today</h3><p>Apps need a known release date within the last 180 days and must be new to saved history.</p></div>{% endfor %}</div>
+</section>
+<section class="section" aria-labelledby="categories-heading"><p class="eyebrow">Explore the evidence</p><h2 id="categories-heading">Newly observed apps by category</h2><p class="muted">{{ total_new }} unique apps across all categories. An app may appear in more than one section below.</p>
+<fieldset class="filter"><legend>Chart type</legend><label><input type="radio" name="filter" value="all" checked> All</label><label><input type="radio" name="filter" value="top-paid"> Paid</label><label><input type="radio" name="filter" value="top-free"> Free</label></fieldset>
+{% for section in sections %}<details class="section-details" data-feed-type="{{ section.feed_type }}"><summary>{{ section.genre_label }} · {{ section.feed_label }} <span class="badge">{{ section.count }} new</span></summary><div class="content">{% if section.apps %}<div class="category-grid">{% for app in section.apps %}<div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><a href="{{ app.url }}">{{ app.name }}</a><br><small>{{ app.artist }} · #{{ app.rank }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No newly observed apps in this category.</p>{% endif %}</div></details>{% endfor %}
+</section>
+</main><footer>Apple chart observations · {{ country|upper }} · Generated {{ now }}<br>Release age comes from Apple’s feed. First observed refers to this tracker’s history, not an app’s first-ever chart entry.</footer>
+</div>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const filters = document.querySelectorAll('input[name="filter"]');
-    const sections = document.querySelectorAll('.section-details');
-
-    function filterSections() {
-      const selectedFilter = document.querySelector('input[name="filter"]:checked').value;
-      sections.forEach(section => {
-        if (selectedFilter === 'all' || section.dataset.feedType === selectedFilter) {
-          section.style.display = 'block';
-        } else {
-          section.style.display = 'none';
-        }
-      });
-    }
-
-    filters.forEach(filter => {
-      filter.addEventListener('change', filterSections);
-    });
-
-    filterSections();
-  });
+const windowSelect = document.getElementById('window');
+windowSelect.addEventListener('change', () => {
+  document.querySelectorAll('[data-window]').forEach(panel => { panel.hidden = panel.dataset.window !== windowSelect.value; });
+});
+document.querySelectorAll('input[name="filter"]').forEach(input => input.addEventListener('change', () => {
+  const selected = document.querySelector('input[name="filter"]:checked').value;
+  document.querySelectorAll('.section-details').forEach(section => { section.hidden = selected !== 'all' && section.dataset.feedType !== selected; });
+}));
 </script>
-<footer><p>Generated {{ now }}</p></footer>
-</body>
-</html>
+</body></html>

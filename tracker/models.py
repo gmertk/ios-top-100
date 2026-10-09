@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 
@@ -9,6 +9,7 @@ class AppItem:
     artist: str
     url: str
     artwork: str
+    release_date: str = ""
 
 
 @dataclass
@@ -42,3 +43,4 @@ class DailyReport:
     country: str
     total_new: int
     sections: List[SectionReport]
+    insights: dict = field(default_factory=dict)

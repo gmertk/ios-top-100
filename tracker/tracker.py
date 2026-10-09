@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, List
+import logging
 
 from .apple_client import AppleFeedClient
 from .config import AppConfig, FEED_LABELS
@@ -8,11 +9,12 @@ from .models import Snapshot, FeedSection, SectionReport, DailyReport
 from .stores import SnapshotStore, SeenStore, MetaStore
 from .renderers import SiteRenderer
 from .notifier import TelegramNotifier
+from .insights import build_insights
 
 
 class Top100Tracker:
     """
-    Orchestrates fetching charts, computing first-ever entrants,
+    Orchestrates fetching charts, computing momentum and new observations,
     rendering static HTML, and sending notifications.
     """
 
@@ -53,16 +55,20 @@ class Top100Tracker:
             for g in f["genres"]:
                 genre = str(g)
                 section = self.client.fetch_section(ftype, genre)
+                logging.info("Fetched %s: %d apps", section.key, len(section.items))
                 feeds[section.key] = section
         return Snapshot(date=self._today_iso(), country=self.cfg.country, feeds=feeds)
 
     def build_report(self, snap: Snapshot) -> DailyReport:
-        # Global first-ever logic
-        total_new = 0
+        # Use dated history rather than the mutable seen registry, so rerunning
+        # today's report preserves its newly observed apps.
+        insights = build_insights(snap, self.snapshots.history_before(snap.date, snap.country),
+                                  self.cfg.genre_labels)
+        new_app_ids = set(insights["new_ids"])
         sections: List[SectionReport] = []
 
         for key, sec in snap.feeds.items():
-            new_ids = self.seen.unseen_only([i.id for i in sec.items])
+            new_ids = [i.id for i in sec.items if i.id in new_app_ids]
 
             apps_out = []
             id_to_item = {i.id: i for i in sec.items}
@@ -87,7 +93,6 @@ class Top100Tracker:
                     apps=apps_out,
                 )
             )
-            total_new += len(new_ids)
 
         # Sort sections by most new
         sections.sort(key=lambda s: s.count, reverse=True)
@@ -95,8 +100,9 @@ class Top100Tracker:
         return DailyReport(
             date=snap.date,
             country=snap.country,
-            total_new=total_new,
+            total_new=len(new_app_ids),
             sections=sections,
+            insights=insights,
         )
 
     def publish(self, report: DailyReport) -> None:
@@ -124,18 +130,23 @@ class Top100Tracker:
         if not self.cfg.site.base_url:
             return
         link = f"{self.cfg.site.base_url}/{report.date}.html"
-        msg = f"📈 iOS Top 100 — {self.cfg.country.upper()} — {report.date}\nFirst-ever entrants today: {report.total_new}\n{link}"
+        window = next(w for w in report.insights["windows"]
+                      if w["days"] == report.insights["default_window"])
+        momentum = (f"{window['total_movers']} apps climbing over {window['days']} days"
+                    if window["available"] else "Momentum: collecting history")
+        msg = f"📈 iOS App Radar — {self.cfg.country.upper()} — {report.date}\nNewly observed: {report.total_new}\n{momentum}\n{link}"
         self.notifier.send(msg)
 
     def run_once(self) -> None:
         snap = self.fetch_snapshot()
-        self.snapshots.save_snapshot(snap)
         report = self.build_report(snap)
+        self.snapshots.save_snapshot(snap)
         # Persist total for index
         self.meta.save_total_new(report.date, report.total_new)
         self.publish(report)
 
-        # Mark everything seen today so re-entries never show again
+        # Maintain the legacy registry for compatibility. Momentum and daily
+        # first-observed counts use dated snapshots independently.
         all_today_ids = []
         for sec in snap.feeds.values():
             all_today_ids.extend([i.id for i in sec.items])

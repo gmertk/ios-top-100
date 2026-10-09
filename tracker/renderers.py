@@ -13,7 +13,7 @@ class SiteRenderer:
     def __init__(self, templates_dir: Path, docs_dir: Path, site_title: str, base_url: str):
         self.env = Environment(
             loader=FileSystemLoader(str(templates_dir)),
-            autoescape=select_autoescape(['html', 'xml'])
+            autoescape=select_autoescape(['html', 'xml', 'j2'])
         )
         self.docs_dir = docs_dir
         self.docs_dir.mkdir(parents=True, exist_ok=True)
@@ -28,6 +28,7 @@ class SiteRenderer:
             country=report.country,
             sections=[asdict(s) for s in report.sections],
             total_new=report.total_new,
+            insights=report.insights,
             base_url=self.base_url,
             now=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         )
