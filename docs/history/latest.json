@@ -38291,7 +38291,7 @@
           "name": "Good Pizza, Great Pizza",
           "artist": "TAPBLAZE",
           "url": "https://apps.apple.com/us/app/good-pizza-great-pizza/id911121200?uo=2",
-          "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/53/57/d6/5357d639-e401-2d6c-b522-9ba13e942521/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.png",
+          "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/22/34/4c/22344c36-4ce2-010c-37aa-b80661911b82/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.png",
           "release_date": "2014-12-02T04:10:01-07:00"
         },
         {
@@ -51470,7 +51470,6 @@
         "687568871",
         "1582359577",
         "6794880428",
-        "6760364261",
         "1277150815",
         "6781260591",
         "6499464775",
@@ -51569,19 +51568,18 @@
         "687568871": 82,
         "1582359577": 83,
         "6794880428": 84,
-        "6760364261": 85,
-        "1277150815": 86,
-        "6781260591": 87,
-        "6499464775": 88,
-        "1098199475": 89,
-        "388961867": 90,
-        "6448077725": 91,
-        "711042537": 92,
-        "1144473563": 93,
-        "883280026": 94,
-        "6463065021": 95,
-        "1598020453": 96,
-        "900967017": 97
+        "1277150815": 85,
+        "6781260591": 86,
+        "6499464775": 87,
+        "1098199475": 88,
+        "388961867": 89,
+        "6448077725": 90,
+        "711042537": 91,
+        "1144473563": 92,
+        "883280026": 93,
+        "6463065021": 94,
+        "1598020453": 95,
+        "900967017": 96
       },
       "items": [
         {
@@ -52255,14 +52253,6 @@
           "url": "https://apps.apple.com/us/app/brown-noise-player/id6794880428?uo=2",
           "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9d/e7/26/9de72691-2dde-634b-744c-1815d698b954/AppIcon-0-0-1x_U007epad-0-1-85-220.png/100x100bb.png",
           "release_date": "2026-08-05T00:00:00-07:00"
-        },
-        {
-          "id": "6760364261",
-          "name": "InnerPulse – GAD-7 & PHQ-9",
-          "artist": "Marvin Blome",
-          "url": "https://apps.apple.com/us/app/innerpulse-gad-7-phq-9/id6760364261?uo=2",
-          "artwork": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/da/6d/bf/da6dbfb9-2fad-7e0d-a4f9-322c6ccbaa33/AppIcon-0-0-1x_U007epad-0-1-85-220.jpeg/100x100bb.png",
-          "release_date": "2026-03-30T00:00:00-07:00"
         },
         {
           "id": "1277150815",
