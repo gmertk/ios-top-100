@@ -29,6 +29,9 @@ class SiteRenderer:
             sections=[asdict(s) for s in report.sections],
             total_new=report.total_new,
             insights=report.insights,
+            categories=sorted({chart["genre"]: chart["label"].split(" · ")[0]
+                               for chart in report.insights.get("filter_data", {}).get("charts", {}).values()}.items(),
+                              key=lambda pair: pair[1]),
             base_url=self.base_url,
             now=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         )

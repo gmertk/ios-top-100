@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from tracker.config import AppConfig
-from tracker.insights import build_insights
+from tracker.insights import build_insights, movement_pattern
 from tracker.models import AppItem, FeedSection, Snapshot
 from tracker.models import DailyReport
 from tracker.renderers import SiteRenderer
@@ -30,6 +30,32 @@ def window(result, days):
 
 
 class InsightTests(unittest.TestCase):
+    def test_movement_labels_require_real_daily_evidence(self):
+        self.assertEqual(movement_pattern([('a', 90), ('b', 20)], 1), 'One-day rise')
+        self.assertEqual(movement_pattern([('a', 90), ('b', None), ('c', 20)], 0), 'Limited history')
+        self.assertEqual(movement_pattern([('a', 90), ('b', 89), ('c', 88), ('d', 20)], 3), 'Sustained climb')
+        self.assertEqual(movement_pattern([('a', 90), ('b', 90), ('c', 89), ('d', 20)], 2), 'Jump-led rise')
+        self.assertEqual(movement_pattern([('a', 90), ('b', 80), ('c', 70), ('d', 71)], 0), 'Mixed movement')
+
+    def test_sustained_gain_outranks_larger_jump_and_pool_is_exported(self):
+        snap = snapshot()
+        section = snap.feeds['top-free:6018']
+        section.items.append(AppItem('jump', 'Jump', 'Maker', '', ''))
+        section.ranks['jump'] = 20
+        days = []
+        for day, rank in [('2026-10-06', 23), ('2026-10-07', 22), ('2026-10-08', 21)]:
+            h = history(day, rank)
+            h['feeds']['top-free:6018']['ranks']['jump'] = 90
+            days.append(h)
+        result = build_insights(snap, days, {})
+        shortlist = window(result, 3)['shortlist']
+        self.assertEqual([a['id'] for a in shortlist], ['a', 'jump'])
+        self.assertEqual(shortlist[0]['signal']['pattern'], 'Sustained climb')
+        self.assertEqual(shortlist[1]['signal']['pattern'], 'Jump-led rise')
+        exported = next(w for w in result['filter_data']['windows'] if w['days'] == 3)
+        self.assertEqual(len(exported['candidates']), 2)
+        self.assertEqual(exported['candidates'][0]['signals'][0]['ranks'], [23, 22, 21, 20])
+
     def test_existing_app_can_be_shortlisted_with_exact_rank_evidence(self):
         result = build_insights(snapshot(), [history("2026-10-02", 80)], {})
         candidate = window(result, 7)["shortlist"][0]

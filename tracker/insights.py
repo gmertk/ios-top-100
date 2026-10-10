@@ -8,6 +8,25 @@ from .models import Snapshot
 WINDOWS = (1, 3, 7, 30)
 
 
+def signal_order(signal):
+    return (signal["streak"] < 3, -signal["gain"], -signal["streak"],
+            signal["rank"], signal["key"])
+
+
+def movement_pattern(observations, streak):
+    if streak >= 3:
+        return "Sustained climb"
+    if len(observations) == 2:
+        return "One-day rise"
+    if any(rank is None for _, rank in observations):
+        return "Limited history"
+    gain = observations[0][1] - observations[-1][1]
+    largest_daily_gain = max(older[1] - newer[1] for older, newer in zip(observations, observations[1:]))
+    if largest_daily_gain >= gain * 0.7:
+        return "Jump-led rise"
+    return "Mixed movement"
+
+
 def ranks_for(feed: dict) -> dict:
     # Historical snapshots stored IDs in rank order. New snapshots preserve
     # explicit ranks, including any gaps returned by a provider.
@@ -39,7 +58,8 @@ def build_insights(snap: Snapshot, history: list, genre_labels: dict) -> dict:
             if not app["release_date"] and item.release_date:
                 app["release_date"] = item.release_date
             app["charts"].append({"key": key, "label": label,
-                                   "rank": section.ranks[item.id], "genre": section.genre})
+                                   "rank": section.ranks[item.id], "genre": section.genre,
+                                   "feed_type": section.feed_type})
 
     for app in apps.values():
         app["charts"].sort(key=lambda c: (c["rank"], c["key"]))
@@ -83,17 +103,18 @@ def build_insights(snap: Snapshot, history: list, genre_labels: dict) -> dict:
                     streak += 1
                 signals.append({**chart, "previous": previous, "gain": gain,
                                 "streak": streak,
+                                "pattern": movement_pattern(observations, streak),
                                 "observations": [{"date": d, "rank": r} for d, r in observations],
                                 "observed_days": sum(r is not None for _, r in observations)})
             if signals:
-                signals.sort(key=lambda c: (-c["gain"], c["rank"], c["key"]))
-                movers.append({**app, "signal": signals[0], "rising_charts": len(signals)})
-        movers.sort(key=lambda a: (-a["signal"]["gain"], -a["signal"]["streak"],
-                                    a["signal"]["rank"], a["id"]))
+                signals.sort(key=signal_order)
+                movers.append({**app, "signal": signals[0], "signals": signals,
+                               "rising_charts": len(signals)})
+        movers.sort(key=lambda a: (*signal_order(a["signal"]), a["id"]))
         windows.append({"days": days, "baseline_date": baseline_date,
                         "available": bool(compared), "compared_charts": len(compared),
                         "matched_apps": len(matched_apps), "total_movers": len(movers),
-                        "shortlist": movers[:5], "movers": movers[5:25]})
+                        "shortlist": movers[:5], "movers": movers[5:25], "candidates": movers})
 
     # A separate discovery list has no implied momentum or market-size score.
     new_apps = [a for a in apps.values() if a["is_new"]]
@@ -103,8 +124,25 @@ def build_insights(snap: Snapshot, history: list, genre_labels: dict) -> dict:
     gap = (today - date.fromisoformat(previous_date)).days if previous_date else None
     preferred = next((w["days"] for d in (7, 3, 1, 30) for w in windows
                       if w["days"] == d and w["available"]), 7)
+    # All candidates reach the browser: filters must run before selecting five,
+    # and must select evidence from the chart that actually matches the filter.
+    eligible_ids = {a["id"] for w in windows for a in w["candidates"]} | {a["id"] for a in recent}
+    charts = {key: {"label": f"{genre_labels.get(sec.genre, sec.genre)} · {FEED_LABELS.get(sec.feed_type, sec.feed_type)}",
+                    "genre": sec.genre, "feed_type": sec.feed_type}
+              for key, sec in snap.feeds.items()}
+    filter_data = {
+        "apps": {app_id: apps[app_id] for app_id in sorted(eligible_ids)},
+        "charts": charts, "discoveries": [a["id"] for a in recent],
+        "windows": [{"days": w["days"], "baseline_date": w["baseline_date"],
+                     "available": w["available"], "candidates": [
+                         {"id": a["id"], "signals": [
+                             {**{k: s[k] for k in ("key", "rank", "previous", "gain", "streak", "pattern", "observed_days")},
+                              "ranks": [p["rank"] for p in s["observations"]]}
+                             for s in a["signals"]]} for a in w["candidates"]]}
+                    for w in windows],
+    }
     return {"total_apps": len(apps), "total_charts": len(snap.feeds),
             "new_ids": sorted(a["id"] for a in new_apps), "windows": windows,
             "default_window": preferred, "discoveries": recent[:5],
             "recent_count": len(recent), "previous_date": previous_date, "gap_days": gap,
-            "baseline": not bool(history)}
+            "baseline": not bool(history), "filter_data": filter_data}

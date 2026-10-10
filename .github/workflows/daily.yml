@@ -35,6 +35,9 @@ jobs:
       - name: Test feed handling
         run: python -m unittest discover -s tests -v
 
+      - name: Test opportunity filters
+        run: node --test tests/test_opportunities.js
+
       - name: Run tracker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

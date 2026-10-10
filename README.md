@@ -6,7 +6,13 @@ Tracks iOS App Store chart momentum and newly observed apps. Runs daily and gene
 
 Each report offers 1-, 3-, 7-, and 30-day comparisons, a shortlist of five climbers, up to 20 additional movers, and five recently released discoveries. Previously seen apps remain eligible for momentum; each shortlist contains unique app IDs.
 
-Momentum is the earlier rank minus the current rank in the **same country, category, and chart type**. The comparison requires the exact earlier date; an old snapshot is never substituted for missing history. Apps absent from the earlier chart have no measured gain. Candidate selection uses the app's largest positive chart gain, then its consecutive daily improvement streak and current rank. Charts are not weighted for market size, and rank movement does not establish organic growth, revenue, or product quality.
+Momentum is the earlier rank minus the current rank in the **same country, category, and chart type**. The comparison requires the exact earlier date; an old snapshot is never substituted for missing history. Apps absent from the earlier chart have no measured gain. Sustained climbs (at least three consecutive daily improvements ending on the report date within the selected window) sort first, followed by gain, streak, and current rank. Each app uses its highest-priority matching chart. Charts are not weighted for market size, and rank movement does not establish organic growth, revenue, or product quality.
+
+The report labels one-day rises, sustained climbs, jump-led rises, mixed movement, and limited history. Without a sustained streak, one daily gain accounting for at least 70% of net window gain is labeled jump-led, provided all daily observations are available. Missing observations break streaks and are never interpolated.
+
+Opportunity filters cover category, free/paid chart type, release age, minimum rank gain, sustained-only momentum, and hiding games. Filtering runs over **every candidate before choosing five**, including selecting evidence from the matching category rather than an unrelated stronger chart. Age limits exclude unknown ages. Games are identified by appearances in the Games or game subcategory charts and hidden across their overall-chart appearances too.
+
+Category, chart type, age, and hidden-item preferences also apply to fresh discoveries; gain and momentum filters only apply to climbers. Apps and developers can be hidden and restored. Preferences use browser-local storage shared across new report dates on the same site; they do not sync between devices or between localhost and GitHub Pages. With JavaScript disabled, reports show their unfiltered default shortlist.
 
 Rank timelines show missing daily observations as gaps. Improvement streaks require consecutive calendar days with strictly better ranks. The interface reports comparison coverage and defaults to seven days when available, then three, one, or thirty days.
 
@@ -62,6 +68,7 @@ Run regression checks with:
 
 ```bash
 python -m unittest discover -s tests -v
+node --test tests/test_opportunities.js
 ```
 
 ## License
