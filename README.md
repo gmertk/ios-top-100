@@ -22,6 +22,12 @@ Snapshots now save app metadata and explicit ranks alongside the original ordere
 
 Reports before this change retain their original category-based totals, which may include the same app more than once. Gaps cannot be backfilled from current charts.
 
+## Opportunity notebook
+
+Use **Save idea** on a discovery, climber card, or mover row to keep an app in your notebook. Add notes about its target user, problem, your proposed improvement, and a small demand experiment, then choose **Save notes**. Saved apps remain in the notebook when they leave the shortlist. Each report shows their positions across its configured charts, with changes since the saved report where comparable observations exist. Missing apps are marked unobserved, never assigned a rank.
+
+The notebook is stored only in your browser, shared across report dates on the same site. Notes are never sent to GitHub and do not automatically sync between devices. **Export notebook** downloads a JSON backup; **Import notebook** merges new apps while preserving existing entries and notes. Save pending edits before exporting or importing. Backups include app details, the saved rank baseline, and notes; they exclude filters and hidden-item preferences. Keep a backup before clearing browser data. The notebook supports 200 apps and import files up to 5 MB. Removal can be undone during the current visit.
+
 ## Setup
 
 ```bash
@@ -68,7 +74,7 @@ Run regression checks with:
 
 ```bash
 python -m unittest discover -s tests -v
-node --test tests/test_opportunities.js
+node --test tests/test_*.js
 ```
 
 ## License

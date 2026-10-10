@@ -131,6 +131,11 @@ def build_insights(snap: Snapshot, history: list, genre_labels: dict) -> dict:
                     "genre": sec.genre, "feed_type": sec.feed_type}
               for key, sec in snap.feeds.items()}
     filter_data = {
+        "date": snap.date, "country": snap.country,
+        # Saved apps must remain trackable even when they are not climbers or
+        # fresh discoveries. Keep this catalog compact (no duplicated artwork).
+        "tracking": {app_id: {k: app[k] for k in ("id", "name", "artist", "url", "charts")}
+                     for app_id, app in apps.items()},
         "apps": {app_id: apps[app_id] for app_id in sorted(eligible_ids)},
         "charts": charts, "discoveries": [a["id"] for a in recent],
         "windows": [{"days": w["days"], "baseline_date": w["baseline_date"],

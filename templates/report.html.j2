@@ -8,7 +8,7 @@
 <body>
 <a class="skip" href="#main">Skip to report</a>
 <div class="wrap">
-<nav><a class="brand" href="./index.html">{{ site_title }}</a><span class="muted">{{ country|upper }} App Store · {{ date }}</span></nav>
+<nav><a class="brand" href="./index.html">{{ site_title }}</a><a href="#notebook">My notebook (<span id="notebook-nav-count">0</span>)</a><span class="muted">{{ country|upper }} App Store · {{ date }}</span></nav>
 <header class="hero"><p class="eyebrow">Daily discovery brief</p><h1>Find the next idea<br>in what’s gaining ground.</h1><p class="intro muted">Follow climbing apps, explore fresh releases, and find a user problem worth investigating.</p></header>
 <main id="main">
 <div class="stats"><div class="stat"><strong>{{ insights.total_apps }}</strong><span>unique apps tracked</span></div><div class="stat"><strong>{{ total_new }}</strong><span>newly observed apps</span></div><div class="stat"><strong>{{ insights.total_charts }}</strong><span>charts captured</span></div></div>
@@ -17,6 +17,14 @@
 {% elif insights.baseline %}
 <aside class="notice"><strong>Your first baseline is ready.</strong><p>Future daily snapshots will reveal movement. Today’s apps establish the starting point and aren’t counted as new entrants.</p></aside>
 {% endif %}
+<details id="notebook" class="section">
+<summary>Opportunity notebook · <span id="notebook-count">0</span> saved apps</summary>
+<div class="content">
+<p>Save apps, record the idea, and compare their positions when you open a new report. Your notes stay in this browser and are never sent to GitHub.</p>
+<div class="actions"><button type="button" id="notebook-export">Export notebook</button><label class="import-label" for="notebook-import">Import notebook<input type="file" id="notebook-import" accept=".json,application/json"></label><button type="button" id="notebook-undo" hidden>Undo removal</button><button type="button" id="notebook-backup" hidden>Download unreadable backup</button></div>
+<p class="research">Export creates a JSON backup of saved apps and notes. Import merges new entries; your existing notes win when an app is already saved. Backups do not include filters or hidden apps.</p>
+<p id="notebook-status" role="status" aria-live="polite"></p><div id="notebook-entries"></div>
+</div></details>
 <section class="opportunity-filters" aria-labelledby="filters-heading">
 <div class="section-top"><div><p class="eyebrow">Your research focus</p><h2 id="filters-heading">Find opportunities that fit</h2><p class="muted">Filters search every candidate before choosing the shortlist. Preferences and hidden apps stay in this browser.</p></div><button type="button" id="reset-filters">Reset filters</button></div>
 <form id="opportunity-filters">
@@ -77,5 +85,6 @@
 <details class="section"><summary>How we distinguish momentum from a jump</summary><div class="content"><p><strong>Sustained climb:</strong> rank improved on each of at least three consecutive days ending on the report date, within the selected comparison window.</p><p><strong>One-day rise:</strong> only one daily change is measured. <strong>Jump-led rise:</strong> no sustained streak and one daily gain accounts for at least 70% of the window’s net gain. <strong>Mixed movement:</strong> positive net gain spread over multiple days without a current three-day streak. <strong>Limited history:</strong> intermediate observations are missing and there is no qualifying current streak.</p><p>Missing days and missing chart positions break streaks. These labels describe observed ranks, not forecasts.</p></div></details></main><footer>Apple chart observations · {{ country|upper }} · Generated {{ now }}<br>Release age comes from Apple’s feed. First observed refers to this tracker’s history, not an app’s first-ever chart entry.</footer>
 </div>
 <script id="opportunity-data" type="application/json">{{ insights.filter_data | tojson }}</script>
+<script>{% include 'notebook.js' %}</script>
 <script>{% include 'opportunities.js' %}</script>
 </body></html>

@@ -35,8 +35,8 @@ jobs:
       - name: Test feed handling
         run: python -m unittest discover -s tests -v
 
-      - name: Test opportunity filters
-        run: node --test tests/test_opportunities.js
+      - name: Test report interactions
+        run: node --test tests/test_*.js
 
       - name: Run tracker
         env:

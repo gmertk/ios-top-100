@@ -30,6 +30,14 @@ def window(result, days):
 
 
 class InsightTests(unittest.TestCase):
+    def test_notebook_tracks_apps_outside_discovery_and_momentum_pools(self):
+        result = build_insights(snapshot(release="2020-01-01"), [history("2026-10-08", 10)], {})
+        data = result["filter_data"]
+        self.assertNotIn("a", data["apps"])
+        self.assertEqual(data["date"], "2026-10-09")
+        self.assertEqual(data["country"], "us")
+        self.assertEqual(data["tracking"]["a"]["charts"][0]["rank"], 20)
+
     def test_movement_labels_require_real_daily_evidence(self):
         self.assertEqual(movement_pattern([('a', 90), ('b', 20)], 1), 'One-day rise')
         self.assertEqual(movement_pattern([('a', 90), ('b', None), ('c', 20)], 0), 'Limited history')

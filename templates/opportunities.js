@@ -37,6 +37,7 @@ if (typeof module !== 'undefined') module.exports = {DEFAULT_FILTERS, signalComp
 
 if (typeof document !== 'undefined') {
   const data = JSON.parse(document.getElementById('opportunity-data').textContent);
+  const notebook = AppNotebook.mount(data);
   const storageKey = 'ios-app-radar-preferences-v1';
   let hidden = {apps: Object.create(null), developers: Object.create(null)};
   let storageWorks = true;
@@ -97,6 +98,7 @@ if (typeof document !== 'undefined') {
   }
   function hideActions(app) {
     const actions = element('div',undefined,'actions');
+    actions.append(notebook.button(app));
     const addButton = (label,kind,key,value) => {
       const button = element('button',label); button.type='button';
       button.setAttribute('aria-label',`${label}: ${value}`);
@@ -177,10 +179,11 @@ if (typeof document !== 'undefined') {
         if (matches.length>5) {
           const wrap=element('div',undefined,'table-wrap'),table=element('table'),head=element('thead'),tr=element('tr'),body=element('tbody');
           table.append(element('caption','More matching climbers'));
-          ['App','Chart','Pattern','Previous','Now','Gain'].forEach(label=>tr.append(element('th',label)));head.append(tr);
+          ['App','Chart','Pattern','Previous','Now','Gain','Notebook'].forEach(label=>tr.append(element('th',label)));head.append(tr);
           matches.slice(5,25).forEach(app=>{
             const row=element('tr'),name=element('td');name.append(appLink(app));row.append(name);
-            [app.signal.label,app.signal.pattern,`#${app.signal.previous}`,`#${app.signal.rank}`,`↑ ${app.signal.gain}`].forEach(value=>row.append(element('td',value)));body.append(row);
+            [app.signal.label,app.signal.pattern,`#${app.signal.previous}`,`#${app.signal.rank}`,`↑ ${app.signal.gain}`].forEach(value=>row.append(element('td',value)));
+            const saveCell=element('td');saveCell.append(notebook.button(app));row.append(saveCell);body.append(row);
           });table.append(head,body);wrap.append(table);container.append(wrap);
         }
       }
