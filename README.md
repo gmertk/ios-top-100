@@ -32,7 +32,13 @@ python -m tracker.main
 
 ## Automation
 
-GitHub Actions runs daily at 06:05 UTC. Set `TELEGRAM_BOT_TOKEN` secret for notifications.
+GitHub Actions runs daily at 06:05 UTC (07:05 in Dublin during summer time, 06:05 in winter). Scheduled starts can be delayed by GitHub.
+
+Bookmark the live site: **https://gmertk.github.io/ios-top-100/**. Each successful run tests the tracker, fetches the charts, commits the report and history, and deploys that run's generated site to GitHub Pages. Your computer does not need to be running.
+
+For an immediate refresh, open **Actions → Daily iOS Top100 Tracker → Run workflow → main**. Check that both `build` and `deploy` finish successfully. GitHub Pages must use **GitHub Actions** as its publishing source; the deployment job uses the `github-pages` environment.
+
+The workflow also supports optional Telegram notifications through `TELEGRAM_BOT_TOKEN` and the settings in `config.yaml`.
 
 ## Feed health and recovery
 

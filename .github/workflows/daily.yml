@@ -17,6 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,22 +46,26 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs
-          git commit -m "report: $(date -u +'%Y-%m-%d')" || echo "No changes"
+          if ! git diff --cached --quiet; then
+            git commit -m "report: $(date -u +'%Y-%m-%d')"
+          fi
           git push
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site from this run
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: main # Ensure we get the latest commit from build job
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
