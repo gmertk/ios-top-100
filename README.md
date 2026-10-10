@@ -22,6 +22,8 @@ Snapshots now save app metadata and explicit ranks alongside the original ordere
 
 Reports before this change retain their original category-based totals, which may include the same app more than once. Gaps cannot be backfilled from current charts.
 
+The **Categories** navigation link opens a searchable chart browser. Filter by category name and free/paid chart, sort by new-app count or category name, and expand or collapse matching results together. Empty charts are hidden by default and can be shown with a checkbox. These controls are independent of the opportunity shortlist filters.
+
 ## Opportunity notebook
 
 Use **Save idea** on a discovery, climber card, or mover row to keep an app in your notebook. Add notes about its target user, problem, your proposed improvement, and a small demand experiment, then choose **Save notes**. Saved apps remain in the notebook when they leave the shortlist. Each report shows their positions across its configured charts, with changes since the saved report where comparable observations exist. Missing apps are marked unobserved, never assigned a rank.

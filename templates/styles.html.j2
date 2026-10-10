@@ -69,4 +69,25 @@ td button[data-notebook-save]{white-space:nowrap;background:var(--accent);color:
   .notebook-form .note-save-status{flex-basis:100%;order:-1}.actions button{min-height:44px}.section{margin-bottom:32px}
 }
 @media(prefers-reduced-motion:no-preference){button,a{transition:background-color .15s,color .15s}}
+.category-toolbar{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin:22px 0}
+.category-controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px}
+.category-controls label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:650;min-width:0}
+.category-controls input,.category-controls select{width:100%;min-height:44px;background:#fff;border:1px solid #a4b5b2;border-radius:8px;padding:9px 12px;color:var(--ink);font-size:15px;font-weight:400}
+.category-options,.category-results-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.category-options{margin-top:14px}.category-options .check-label{margin:0;font-size:14px}
+.category-options button{border:0;background:transparent;color:var(--muted);font-size:13px}
+.category-results-bar{border-top:1px solid var(--line);padding-top:14px;margin-top:14px;font-size:13px}
+.category-results-bar p{margin:0}.category-expand{display:flex;gap:8px}.category-expand button{font-size:12px;min-height:36px}
+#category-results>.section-details>summary{display:flex;gap:16px;align-items:center;padding:18px 20px}
+#category-results>.section-details>summary:before{content:'+';font-weight:400;color:var(--green);font-size:23px}
+#category-results>.section-details[open]>summary:before{content:'−'}#category-results summary::-webkit-details-marker{display:none}
+.category-title{font-size:16px}.category-title small{display:block;font-size:12px;font-weight:400;margin-top:2px}
+.category-grid{padding:10px 0;gap:24px}.category-grid .app{align-items:flex-start}
+.category-back{display:inline-block;font-size:13px;margin-top:20px;padding:8px 0}
+@media(max-width:650px){
+  .nav-links{gap:6px}.nav-links a{font-size:12px}.nav-links .notebook-link{padding:9px 8px}
+  .category-toolbar{padding:16px}.category-controls{grid-template-columns:1fr 1fr;gap:12px}.category-search{grid-column:1/-1}
+  .category-controls input,.category-controls select{font-size:16px}.category-expand{width:100%}.category-expand button{flex:1;min-height:44px}
+  #category-results>.section-details>summary{padding:16px;gap:12px}.category-grid{grid-template-columns:1fr}
+}
 </style>

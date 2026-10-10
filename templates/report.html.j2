@@ -8,7 +8,7 @@
 <body>
 <a class="skip" href="#main">Skip to report</a>
 <div class="wrap">
-<nav class="report-nav" aria-label="Report navigation"><a class="brand" href="./index.html">{{ site_title }}</a><div class="nav-links"><a href="#momentum">Climbers</a><a href="#discoveries">Fresh finds</a><a class="notebook-link" href="#notebook">My notebook <span id="notebook-nav-count">0</span></a></div><span class="report-date">{{ country|upper }} · {{ date }}</span></nav>
+<nav class="report-nav" aria-label="Report navigation"><a class="brand" href="./index.html">{{ site_title }}</a><div class="nav-links"><a href="#momentum">Climbers</a><a href="#discoveries">Fresh finds</a><a href="#categories">Categories</a><a class="notebook-link" href="#notebook">My notebook <span id="notebook-nav-count">0</span></a></div><span class="report-date">{{ country|upper }} · {{ date }}</span></nav>
 <header class="hero"><p class="eyebrow">Daily discovery brief</p><h1>Spot momentum.<br>Find your next idea.</h1><p class="intro muted">Discover rising apps. Save what stands out. Turn a signal into a small experiment.</p></header>
 <main id="main">
 <div class="stats"><div class="stat"><strong>{{ insights.total_apps }}</strong><span>unique apps tracked</span></div><div class="stat"><strong>{{ total_new }}</strong><span>newly observed apps</span></div><div class="stat"><strong>{{ insights.total_charts }}</strong><span>charts captured</span></div></div>
@@ -78,9 +78,22 @@
 <p class="research">Saved on this browser only. Export a backup to move your ideas to another device. Imports keep existing notes; filters and hidden apps are separate.</p>
 <p id="notebook-status" role="status" aria-live="polite"></p><div id="notebook-entries"></div>
 </div></details>
-<section class="section" aria-labelledby="categories-heading"><p class="eyebrow">Explore the evidence</p><h2 id="categories-heading">Newly observed apps by category</h2><p class="muted">{{ total_new }} unique apps across all categories. An app may appear in more than one section below.</p>
-<fieldset class="filter"><legend>Chart type</legend><label><input type="radio" name="filter" value="all" checked> All</label><label><input type="radio" name="filter" value="top-paid"> Paid</label><label><input type="radio" name="filter" value="top-free"> Free</label></fieldset>
-{% for section in sections %}<details class="section-details" data-feed-type="{{ section.feed_type }}"><summary>{{ section.genre_label }} · {{ section.feed_label }} <span class="badge">{{ section.count }} new</span></summary><div class="content">{% if section.apps %}<div class="category-grid">{% for app in section.apps %}<div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><a href="{{ app.url }}">{{ app.name }}</a><br><small>{{ app.artist }} · #{{ app.rank }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No newly observed apps in this category.</p>{% endif %}</div></details>{% endfor %}
+<section id="categories" class="section" aria-labelledby="categories-heading">
+<p class="eyebrow">Explore the evidence</p><h2 id="categories-heading">Newly observed apps by category</h2>
+<p class="muted">{{ total_new }} unique apps across all categories. An app can appear in several charts.</p>
+<div class="category-toolbar">
+<div class="category-controls">
+<label class="category-search">Find a category<input id="category-search" type="search" placeholder="Try Productivity, Books, or Games" autocomplete="off" aria-controls="category-results"></label>
+<label>Chart<select id="category-chart"><option value="all">Free &amp; paid</option><option value="top-free">Free</option><option value="top-paid">Paid</option></select></label>
+<label>Sort by<select id="category-sort"><option value="new">Most new apps</option><option value="name">Category A–Z</option></select></label>
+</div>
+<div class="category-options"><label class="check-label"><input id="category-show-empty" type="checkbox"> Show empty charts</label><button id="category-reset" type="button">Reset category filters</button></div>
+<div class="category-results-bar"><p id="category-results-count" class="muted" role="status" aria-live="polite"></p><div class="category-expand"><button type="button" id="category-expand">Expand results</button><button type="button" id="category-collapse">Collapse results</button></div></div>
+</div>
+<div id="category-empty" class="empty" hidden><h3>No categories match</h3><p>Try a shorter search, choose another chart type, or show empty charts.</p><button id="category-empty-reset" type="button">Show categories with new apps</button></div>
+<div id="category-results">
+{% for section in sections %}<details class="section-details" data-feed-type="{{ section.feed_type }}" data-category="{{ section.genre_label }}" data-new-count="{{ section.count }}"><summary><span class="category-title">{{ section.genre_label }}<small>{{ section.feed_label }}</small></span><span class="count-pill">{{ section.count }} new</span></summary><div class="content">{% if section.apps %}<div class="category-grid">{% for app in section.apps %}<div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><a href="{{ app.url }}">{{ app.name }}</a><br><small>{{ app.artist }} · #{{ app.rank }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No newly observed apps in this category.</p>{% endif %}<a class="category-back" href="#categories">Back to category search ↑</a></div></details>{% endfor %}
+</div>
 </section>
 <details class="section"><summary>How we distinguish momentum from a jump</summary><div class="content"><p><strong>Sustained climb:</strong> rank improved on each of at least three consecutive days ending on the report date, within the selected comparison window.</p><p><strong>One-day rise:</strong> only one daily change is measured. <strong>Jump-led rise:</strong> no sustained streak and one daily gain accounts for at least 70% of the window’s net gain. <strong>Mixed movement:</strong> positive net gain spread over multiple days without a current three-day streak. <strong>Limited history:</strong> intermediate observations are missing and there is no qualifying current streak.</p><p>Missing days and missing chart positions break streaks. These labels describe observed ranks, not forecasts.</p></div></details></main><footer>Apple chart observations · {{ country|upper }} · Generated {{ now }}<br>Release age comes from Apple’s feed. First observed refers to this tracker’s history, not an app’s first-ever chart entry.</footer>
 </div>

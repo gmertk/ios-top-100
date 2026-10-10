@@ -212,9 +212,39 @@ if (typeof document !== 'undefined') {
   get('window').addEventListener('change',render);
   get('reset-filters').addEventListener('click',()=>{applyFilters(DEFAULT_FILTERS);save();render();});
   get('restore-hidden').addEventListener('click',()=>{hidden={apps:Object.create(null),developers:Object.create(null)};save();render();});
-  document.querySelectorAll('input[name="filter"]').forEach(input=>input.addEventListener('change',()=>{
-    const selected=document.querySelector('input[name="filter"]:checked').value;
-    document.querySelectorAll('.section-details').forEach(section=>{section.hidden=selected!=='all' && section.dataset.feedType!==selected;});
+  const categorySections=[...get('category-results').querySelectorAll('.section-details')];
+  function renderCategories() {
+    const query=get('category-search').value.trim().toLocaleLowerCase(), chart=get('category-chart').value;
+    const showEmpty=get('category-show-empty').checked, alphabetical=get('category-sort').value==='name';
+    const sorted=[...categorySections].sort((a,b)=>
+      (alphabetical?0:Number(b.dataset.newCount)-Number(a.dataset.newCount)) ||
+      a.dataset.category.localeCompare(b.dataset.category) || a.dataset.feedType.localeCompare(b.dataset.feedType));
+    for(const section of sorted) {
+      section.hidden=!section.dataset.category.toLocaleLowerCase().includes(query) ||
+        (chart!=='all' && section.dataset.feedType!==chart) || (!showEmpty && Number(section.dataset.newCount)===0);
+      get('category-results').append(section);
+    }
+    const visible=sorted.filter(section=>!section.hidden), categories=new Set(visible.map(section=>section.dataset.category));
+    get('category-results-count').textContent=`${visible.length} of ${categorySections.length} charts · ${categories.size} ${categories.size===1?'category':'categories'}${showEmpty?'':' · Empty charts hidden'}`;
+    get('category-empty').hidden=visible.length>0;
+    get('category-expand').disabled=!visible.some(section=>!section.open);
+    get('category-collapse').disabled=!visible.some(section=>section.open);
+  }
+  function resetCategories() {
+    get('category-search').value='';get('category-chart').value='all';get('category-sort').value='new';get('category-show-empty').checked=false;
+    renderCategories();get('category-search').focus();
+  }
+  get('category-search').addEventListener('input',renderCategories);
+  for(const id of ['category-chart','category-sort','category-show-empty'])get(id).addEventListener('change',renderCategories);
+  for(const id of ['category-reset','category-empty-reset'])get(id).addEventListener('click',resetCategories);
+  for(const [id,open] of [['category-expand',true],['category-collapse',false]])get(id).addEventListener('click',()=>{
+    categorySections.filter(section=>!section.hidden).forEach(section=>{section.open=open;});renderCategories();
+  });
+  categorySections.forEach(section=>section.addEventListener('toggle',()=>{
+    const visible=categorySections.filter(section=>!section.hidden);
+    get('category-expand').disabled=!visible.some(section=>!section.open);
+    get('category-collapse').disabled=!visible.some(section=>section.open);
   }));
+  renderCategories();
   render();
 }
