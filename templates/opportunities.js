@@ -99,14 +99,17 @@ if (typeof document !== 'undefined') {
   function hideActions(app) {
     const actions = element('div',undefined,'actions');
     actions.append(notebook.button(app));
+    const more=element('details',undefined,'card-menu');
+    more.append(element('summary','Hide options'));
     const addButton = (label,kind,key,value) => {
       const button = element('button',label); button.type='button';
       button.setAttribute('aria-label',`${label}: ${value}`);
       button.addEventListener('click',() => {hidden[kind][key]=value; save(); render(); get('hidden-manager').querySelector('summary').focus();});
-      actions.append(button);
+      more.append(button);
     };
     addButton('Hide app','apps',app.id,app.name || app.id);
     if (app.artist) addButton('Hide developer','developers',app.artist,app.artist);
+    actions.append(more);
     return actions;
   }
   function dayAt(baseline,index) {
@@ -167,6 +170,15 @@ if (typeof document !== 'undefined') {
   }
   function render() {
     const f=filters(), days=Number(get('window').value), w=data.windows.find(w=>w.days===days);
+    const chips=get('active-filters');chips.replaceChildren();
+    for(const [key,id] of Object.entries(controls)) {
+      if(String(f[key])===String(DEFAULT_FILTERS[key]))continue;
+      const label=key==='hideGames'?'Games hidden':get(id).selectedOptions[0].textContent;
+      const chip=element('button',`${label} ×`,'filter-chip');chip.type='button';chip.setAttribute('aria-label',`Remove filter: ${label}`);
+      chip.addEventListener('click',()=>{applyFilters({...filters(),[key]:DEFAULT_FILTERS[key]});save();render();if(['minGain','mode','hideGames'].includes(key))get('advanced-filters').open=true;get(id).focus();});chips.append(chip);
+    }
+    const advanced=['minGain','mode','hideGames'].filter(key=>String(f[key])!==String(DEFAULT_FILTERS[key])).length;
+    get('advanced-count').textContent=advanced?`· ${advanced} active`:'';
     document.querySelectorAll('[data-window]').forEach(panel=>{panel.hidden=Number(panel.dataset.window)!==days;});
     const container=document.querySelector(`[data-filter-results="${days}"]`);
     if (container) {
@@ -177,6 +189,7 @@ if (typeof document !== 'undefined') {
       } else {
         const cards=element('div',undefined,'cards');matches.slice(0,5).forEach(app=>cards.append(momentumCard(app,w)));container.append(cards);
         if (matches.length>5) {
+          const more=element('details',undefined,'more-climbers');more.append(element('summary',`Explore ${Math.min(matches.length-5,20)} more climbers`));
           const wrap=element('div',undefined,'table-wrap'),table=element('table'),head=element('thead'),tr=element('tr'),body=element('tbody');
           table.append(element('caption','More matching climbers'));
           ['App','Chart','Pattern','Previous','Now','Gain','Notebook'].forEach(label=>tr.append(element('th',label)));head.append(tr);
@@ -184,7 +197,7 @@ if (typeof document !== 'undefined') {
             const row=element('tr'),name=element('td');name.append(appLink(app));row.append(name);
             [app.signal.label,app.signal.pattern,`#${app.signal.previous}`,`#${app.signal.rank}`,`↑ ${app.signal.gain}`].forEach(value=>row.append(element('td',value)));
             const saveCell=element('td');saveCell.append(notebook.button(app));row.append(saveCell);body.append(row);
-          });table.append(head,body);wrap.append(table);container.append(wrap);
+          });table.append(head,body);wrap.append(table);more.append(wrap);container.append(more);
         }
       }
     }

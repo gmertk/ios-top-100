@@ -8,8 +8,8 @@
 <body>
 <a class="skip" href="#main">Skip to report</a>
 <div class="wrap">
-<nav><a class="brand" href="./index.html">{{ site_title }}</a><a href="#notebook">My notebook (<span id="notebook-nav-count">0</span>)</a><span class="muted">{{ country|upper }} App Store · {{ date }}</span></nav>
-<header class="hero"><p class="eyebrow">Daily discovery brief</p><h1>Find the next idea<br>in what’s gaining ground.</h1><p class="intro muted">Follow climbing apps, explore fresh releases, and find a user problem worth investigating.</p></header>
+<nav class="report-nav" aria-label="Report navigation"><a class="brand" href="./index.html">{{ site_title }}</a><div class="nav-links"><a href="#momentum">Climbers</a><a href="#discoveries">Fresh finds</a><a class="notebook-link" href="#notebook">My notebook <span id="notebook-nav-count">0</span></a></div><span class="report-date">{{ country|upper }} · {{ date }}</span></nav>
+<header class="hero"><p class="eyebrow">Daily discovery brief</p><h1>Spot momentum.<br>Find your next idea.</h1><p class="intro muted">Discover rising apps. Save what stands out. Turn a signal into a small experiment.</p></header>
 <main id="main">
 <div class="stats"><div class="stat"><strong>{{ insights.total_apps }}</strong><span>unique apps tracked</span></div><div class="stat"><strong>{{ total_new }}</strong><span>newly observed apps</span></div><div class="stat"><strong>{{ insights.total_charts }}</strong><span>charts captured</span></div></div>
 {% if insights.gap_days and insights.gap_days > 1 %}
@@ -17,29 +17,21 @@
 {% elif insights.baseline %}
 <aside class="notice"><strong>Your first baseline is ready.</strong><p>Future daily snapshots will reveal movement. Today’s apps establish the starting point and aren’t counted as new entrants.</p></aside>
 {% endif %}
-<details id="notebook" class="section">
-<summary>Opportunity notebook · <span id="notebook-count">0</span> saved apps</summary>
-<div class="content">
-<p>Save apps, record the idea, and compare their positions when you open a new report. Your notes stay in this browser and are never sent to GitHub.</p>
-<div class="actions"><button type="button" id="notebook-export">Export notebook</button><label class="import-label" for="notebook-import">Import notebook<input type="file" id="notebook-import" accept=".json,application/json"></label><button type="button" id="notebook-undo" hidden>Undo removal</button><button type="button" id="notebook-backup" hidden>Download unreadable backup</button></div>
-<p class="research">Export creates a JSON backup of saved apps and notes. Import merges new entries; your existing notes win when an app is already saved. Backups do not include filters or hidden apps.</p>
-<p id="notebook-status" role="status" aria-live="polite"></p><div id="notebook-entries"></div>
-</div></details>
 <section class="opportunity-filters" aria-labelledby="filters-heading">
-<div class="section-top"><div><p class="eyebrow">Your research focus</p><h2 id="filters-heading">Find opportunities that fit</h2><p class="muted">Filters search every candidate before choosing the shortlist. Preferences and hidden apps stay in this browser.</p></div><button type="button" id="reset-filters">Reset filters</button></div>
+<div class="section-top"><div><p class="eyebrow">Your research focus</p><h2 id="filters-heading">Focus your search</h2><p class="muted">Choose a market and find the apps worth a closer look.</p></div><button type="button" id="reset-filters">Reset filters</button></div>
 <form id="opportunity-filters">
 <div class="filter-grid">
 <label>Category<select id="category"><option value="any">All categories</option>{% for genre, label in categories %}<option value="{{ genre }}">{{ label }}</option>{% endfor %}</select></label>
 <label>Chart type<select id="chart-type"><option value="any">Free &amp; paid</option><option value="top-free">Free</option><option value="top-paid">Paid</option></select></label>
 <label>Release age<select id="release-age"><option value="any">Any age</option><option value="90">Within 90 days</option><option value="180">Within 180 days</option><option value="365">Within 1 year</option></select></label>
-<label>Minimum rank gain<select id="min-gain"><option value="1">1+ places</option><option value="5">5+ places</option><option value="10">10+ places</option><option value="20">20+ places</option><option value="40">40+ places</option></select></label>
+</div><details id="advanced-filters" class="advanced-filters"><summary>Momentum filters <span id="advanced-count"></span></summary><div class="content"><div class="filter-grid advanced-grid"><label>Minimum rank gain<select id="min-gain"><option value="1">1+ places</option><option value="5">5+ places</option><option value="10">10+ places</option><option value="20">20+ places</option><option value="40">40+ places</option></select></label>
 <label>Momentum<select id="momentum-mode"><option value="any">All rises · sustained first</option><option value="sustained">Sustained climbs only</option></select></label>
-</div><label class="check-label"><input id="hide-games" type="checkbox"> Hide games, including their overall-chart appearances</label>
-</form><p class="research">Gain and momentum filters apply to climbers. Category, chart type, age, and hidden items also apply to fresh discoveries. Unknown release ages are excluded when an age limit is selected.</p>
+</div><label class="check-label"><input id="hide-games" type="checkbox"> Hide games across all charts</label><p class="research">Gain and momentum apply to climbers. Category, chart type, age, and hidden items also apply to fresh finds. Age filters exclude apps with unknown release dates.</p></div></details>
+</form><div id="active-filters" class="active-filters" aria-label="Active filters"></div>
 <details id="hidden-manager"><summary>Hidden apps &amp; developers (<span id="hidden-count">0</span>)</summary><div class="content"><p id="storage-status" class="muted">Stored on this browser only.</p><div id="hidden-items"></div><button id="restore-hidden" type="button">Restore all hidden items</button></div></details>
 </section>
-<section class="section" aria-labelledby="momentum-heading">
-<div class="section-top"><div><p class="eyebrow">Momentum</p><h2 id="momentum-heading">Five climbers to investigate</h2><p class="muted">Sustained climbs come first: at least three consecutive daily improvements ending today. Then we sort by rank gain, streak, and current rank within a matching chart.</p></div><div class="control"><label for="window">Compare</label><select id="window">{% for w in insights.windows %}<option value="{{ w.days }}"{% if w.days == insights.default_window %} selected{% endif %}>{{ w.days }} day{% if w.days != 1 %}s{% endif %}</option>{% endfor %}</select></div></div>
+<section id="momentum" class="section" aria-labelledby="momentum-heading">
+<div class="section-top"><div><p class="eyebrow">Momentum</p><h2 id="momentum-heading">Five climbers to investigate</h2><p class="muted">Your strongest matching signals, with sustained climbs first. Open the evidence to see what changed.</p></div><div class="control"><label for="window">Compare</label><select id="window">{% for w in insights.windows %}<option value="{{ w.days }}"{% if w.days == insights.default_window %} selected{% endif %}>{{ w.days }} day{% if w.days != 1 %}s{% endif %}</option>{% endfor %}</select></div></div>
 <noscript><p>Enable JavaScript to use filters, hide apps, or switch windows. The unfiltered default comparison is shown below.</p></noscript>
 <div aria-live="polite">
 {% for w in insights.windows %}
@@ -75,9 +67,17 @@
 </div>
 <p class="research">Rank movement is a research signal, not evidence of revenue, organic growth, or an unmet need. Apps missing from the earlier chart are not assigned an invented starting rank.</p>
 </section>
-<section class="section" aria-labelledby="discovery-heading"><div class="section-top"><div><p class="eyebrow">Fresh discoveries</p><h2 id="discovery-heading">Recently released, newly observed</h2><p class="muted">{{ insights.recent_count }} unique apps released within 180 days and first observed in this snapshot. Showing up to five, ordered by best current rank, then app age. Momentum is not required.</p></div></div>
+<section id="discoveries" class="section" aria-labelledby="discovery-heading"><div class="section-top"><div><p class="eyebrow">Fresh discoveries</p><h2 id="discovery-heading">Fresh finds</h2><p class="muted">Recently released apps appearing in our history for the first time. A starting point for research.</p></div></div>
 <p id="discovery-count" class="muted" aria-live="polite"></p><div class="cards" id="discovery-cards">{% for app in insights.discoveries %}<article class="card"><div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><h3><a href="{{ app.url }}">{{ app.name or app.id }}</a></h3><small>{{ app.artist }}</small></div></div><span class="badge">Released {{ app.age_days }} days ago</span><p><strong>#{{ app.best_chart.rank }}</strong> in {{ app.best_chart.label }}</p><p class="muted">Appears in {{ app.charts|length }} tracked chart{% if app.charts|length != 1 %}s{% endif %}.</p><details><summary>All current chart positions</summary><ul>{% for chart in app.charts %}<li>#{{ chart.rank }} · {{ chart.label }}</li>{% endfor %}</ul></details><p class="research">Research next: identify the core user problem and check whether reviews support demand for it.</p></article>{% else %}<div class="empty"><h3>No qualifying discoveries today</h3><p>Apps need a known release date within the last 180 days and must be new to saved history.</p></div>{% endfor %}</div>
 </section>
+<details id="notebook" class="section">
+<summary class="notebook-heading"><span>My opportunity notebook<small>Your shortlist, ideas, and next experiments</small></span><span class="count-pill"><span id="notebook-count">0</span> saved</span></summary>
+<div class="content">
+<p class="muted">Keep promising apps here and develop your own angle. Chart positions update when you open a new report.</p>
+<div class="actions"><button type="button" id="notebook-export">Export notebook</button><label class="import-label" for="notebook-import">Import notebook<input type="file" id="notebook-import" accept=".json,application/json"></label><button type="button" id="notebook-undo" hidden>Undo removal</button><button type="button" id="notebook-backup" hidden>Download unreadable backup</button></div>
+<p class="research">Saved on this browser only. Export a backup to move your ideas to another device. Imports keep existing notes; filters and hidden apps are separate.</p>
+<p id="notebook-status" role="status" aria-live="polite"></p><div id="notebook-entries"></div>
+</div></details>
 <section class="section" aria-labelledby="categories-heading"><p class="eyebrow">Explore the evidence</p><h2 id="categories-heading">Newly observed apps by category</h2><p class="muted">{{ total_new }} unique apps across all categories. An app may appear in more than one section below.</p>
 <fieldset class="filter"><legend>Chart type</legend><label><input type="radio" name="filter" value="all" checked> All</label><label><input type="radio" name="filter" value="top-paid"> Paid</label><label><input type="radio" name="filter" value="top-free"> Free</label></fieldset>
 {% for section in sections %}<details class="section-details" data-feed-type="{{ section.feed_type }}"><summary>{{ section.genre_label }} · {{ section.feed_label }} <span class="badge">{{ section.count }} new</span></summary><div class="content">{% if section.apps %}<div class="category-grid">{% for app in section.apps %}<div class="app">{% if app.artwork %}<img src="{{ app.artwork }}" alt="" loading="lazy">{% endif %}<div><a href="{{ app.url }}">{{ app.name }}</a><br><small>{{ app.artist }} · #{{ app.rank }}</small></div></div>{% endfor %}</div>{% else %}<p class="muted">No newly observed apps in this category.</p>{% endif %}</div></details>{% endfor %}

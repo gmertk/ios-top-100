@@ -1,6 +1,7 @@
 const AppNotebook = (() => {
   const STORAGE_KEY = 'ios-app-radar-notebook-v1';
   const FIELDS = {why:'Why it caught my attention', audience:'Target user', problem:'Problem to solve', angle:'My proposed improvement', experiment:'Smallest experiment to test demand'};
+  const HINTS = {why:'What signal or detail made this worth saving?',audience:'Who needs this, and in what situation?',problem:'What is difficult, slow, or frustrating today?',angle:'What would you make simpler or better?',experiment:'One small test before building: an interview, a prototype, or a landing page.'};
   const MAX_ENTRIES = 200, MAX_BYTES = 5 * 1024 * 1024;
   const keyFor = entry => `${entry.country}:${entry.id}`;
   const blankNotes = () => Object.fromEntries(Object.keys(FIELDS).map(key=>[key,'']));
@@ -90,6 +91,7 @@ const AppNotebook = (() => {
       document.querySelectorAll('[data-notebook-save]').forEach(button=>{
         const isSaved=saved.has(button.dataset.notebookSave);
         button.textContent=isSaved?'Open saved idea':'Save idea';button.disabled=unreadable!==null;
+        button.dataset.saved=String(isSaved);
         button.setAttribute('aria-label',`${button.textContent}: ${button.dataset.appName}`);
       });
     }
@@ -112,6 +114,7 @@ const AppNotebook = (() => {
       const button=el('button');button.type='button';button.dataset.notebookSave=`${data.country}:${app.id}`;button.dataset.appName=app.name||app.id;
       const saved=entries.some(e=>keyFor(e)===button.dataset.notebookSave);
       button.textContent=saved?'Open saved idea':'Save idea';button.setAttribute('aria-label',`${button.textContent}: ${button.dataset.appName}`);button.disabled=unreadable!==null;
+      button.dataset.saved=String(saved);
       button.addEventListener('click',()=>saveApp(app));return button;
     }
     function render() {
@@ -119,7 +122,10 @@ const AppNotebook = (() => {
       const expanded=new Set([...container.children].filter(c=>c.open).map(c=>c.dataset.entry));
       container.replaceChildren();get('notebook-count').textContent=entries.length;get('notebook-nav-count').textContent=entries.length;
       get('notebook-undo').hidden=removed===null;get('notebook-backup').hidden=unreadable===null;
-      if (!entries.length) container.append(el('p',unreadable!==null?'Your original notebook is preserved in browser storage.':'No saved ideas yet. Use Save idea on an app card or a climber row.','empty'));
+      if (!entries.length) {
+        const empty=el('div',undefined,'empty');empty.append(el('h3',unreadable!==null?'Your notebook is preserved':'Start with one promising app'),el('p',unreadable!==null?'Download the unreadable backup to recover your notes.':'Choose Save idea on a climber or fresh find. Then capture the user problem and one experiment to try.'));
+        if(unreadable===null){const browse=el('a','Explore today’s climbers →');browse.href='#momentum';empty.append(browse);}container.append(empty);
+      }
       for (const entry of [...entries].sort((a,b)=>b.savedAt.localeCompare(a.savedAt))) {
         const key=keyFor(entry), card=el('details');card.dataset.entry=key;card.open=expanded.has(key);card.append(el('summary',`${entry.name} · ${entry.country.toUpperCase()}`));
         const content=el('div',undefined,'content'),link=el('a','View on the App Store');if(safeURL(entry.url))link.href=entry.url;
@@ -133,19 +139,23 @@ const AppNotebook = (() => {
           }content.append(list);
         } else content.append(el('p',observation.state==='other-country'?`Saved in ${entry.country.toUpperCase()}; this report covers ${data.country.toUpperCase()}.`:`Not observed in this report's configured charts (${data.date}). This does not mean the app was removed from the store.`,'muted'));
         const form=el('form',undefined,'notebook-form'),values=drafts.get(key)||entry.notes;
+        const saveStatus=el('span',drafts.has(key)?'Unsaved changes':storageAvailable?'Saved on this browser':'Saved for this visit only — export a backup','note-save-status');saveStatus.setAttribute('role','status');
         for(const [field,labelText] of Object.entries(FIELDS)) {
           const label=el('label',labelText),input=el('textarea');input.rows=2;input.maxLength=4000;input.value=values[field];input.name=field;input.setAttribute('aria-label',`${labelText} — ${entry.name}`);
-          input.addEventListener('input',()=>{const values=Object.fromEntries([...form.querySelectorAll('textarea')].map(t=>[t.name,t.value]));drafts.set(key,values);status('Unsaved notes. Choose Save notes to keep them.');});
+          input.placeholder=HINTS[field];
+          input.addEventListener('input',()=>{const values=Object.fromEntries([...form.querySelectorAll('textarea')].map(t=>[t.name,t.value]));drafts.set(key,values);saveStatus.textContent='Unsaved changes';});
           label.append(input);form.append(label);
         }
         const actions=el('div',undefined,'actions'),save=el('button','Save notes'),remove=el('button','Remove from notebook');save.type='submit';remove.type='button';
+        remove.className='remove-note';
         save.setAttribute('aria-label',`Save notes: ${entry.name}`);remove.setAttribute('aria-label',`Remove from notebook: ${entry.name}`);
         form.addEventListener('submit',event=>{
           event.preventDefault();const notes=Object.fromEntries([...form.querySelectorAll('textarea')].map(t=>[t.name,t.value]));
           if(commit(existing=>{
             if(!existing.some(e=>keyFor(e)===key))throw new Error('This app was removed in another tab. Save it again before editing.');
             return existing.map(e=>keyFor(e)===key?{...e,notes}:e);
-          },'Notes saved.'))drafts.delete(key);
+          },'Notes saved.')){drafts.delete(key);saveStatus.textContent=storageAvailable?'Saved on this browser':'Saved for this visit only — export a backup';}
+          else saveStatus.textContent=get('notebook-status').textContent;
         });
         remove.addEventListener('click',()=>{
           let savedEntry;
@@ -153,7 +163,7 @@ const AppNotebook = (() => {
             removed=savedEntry?{entry:savedEntry,draft:drafts.get(key)}:null;drafts.delete(key);render();get('notebook-undo').focus();
           }
         });
-        actions.append(save,remove);form.append(actions);content.append(form);card.append(content);container.append(card);
+        actions.append(save,saveStatus,remove);form.append(actions);content.append(form);card.append(content);container.append(card);
       }
       syncButtons();
     }
